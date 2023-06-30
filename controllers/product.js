@@ -1,5 +1,6 @@
 import slugify from 'slugify'
 import productModel from '../models/product.js'
+import categoryModel from '../models/category.js'
 import fs from 'fs'
 
 // Create product
@@ -260,6 +261,25 @@ export const relatedProductHandler = async(req, res) => {
             success: false,
             error,
             message: 'Error in load related product API',
+        })
+    }
+}
+
+export const productCategoryHandler = async(req, res) => {
+    try {
+        const category = await categoryModel.findOne({ slug: req.params.slug })
+        const products = await productModel.find({ category }).populate('category')
+        res.status(200).send({
+            success: true,
+            category,
+            products
+        })
+    } catch (error) {
+        console.log(error);
+        res.status(400).send({
+            success: false,
+            error,
+            message: 'Error while getting products'
         })
     }
 }
