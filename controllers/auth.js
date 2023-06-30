@@ -41,7 +41,7 @@ export const registerHandler = async(req, res) => {
         res.status(201).send({
             success: true,
             message: 'User has been registered',
-            user: user,
+            user,
         })
 
     } catch (error) {
