@@ -1,4 +1,5 @@
 import userModel from "../models/user.js"
+import orderModel from "../models/order.js";
 import { comparePassword, hashPassword } from './../helpers/auth.js';
 import JWT from 'jsonwebtoken'
 
@@ -88,6 +89,7 @@ export const loginHandler = async(req, res) => {
             success: true,
             message: 'Login successful',
             user: {
+                _id: user._id,
                 name: user.name,
                 email: user.email,
                 phone: user.phone,
@@ -144,4 +146,82 @@ export const forgotPasswordHandler = async(req, res) => {
 // test handler
 export const testHandler = (req, res) => {
     res.send('protected route')
+}
+
+// update profile
+export const updateProfileHandler = async(req, res) => {
+    try {
+        const { name, email, password, address, phone } = req.body
+        const user = await userModel.findById(req.user._id)
+            // Password 
+        if (!password && password.length < 6) {
+            return res.json({ error: 'Password must be required and least 6 characters' })
+        }
+        const hashedPassword = password ? await hashPassword(password) : undefined;
+        const updatedUser = await userModel.findByIdAndUpdate(
+            req.user._id, {
+                name: name || user.name,
+                password: hashedPassword || user.password,
+                phone: phone || user.phone,
+                address: address || user.address,
+            }, { new: true });
+        res.status(200).send({
+            success: true,
+            message: 'Profile updated successfully',
+            updatedUser
+        })
+    } catch (error) {
+        console.log(error)
+        res.status(400).send({
+            success: false,
+            error,
+            message: 'Error while updating profile'
+        })
+    }
+}
+
+export const getOrderHandler = async(req, res) => {
+    try {
+        // const { id } = req.body
+        const orders = await orderModel.find({ buyer: req.user._id }).populate('products', '-photo').populate('buyer', 'name')
+        res.json(orders)
+    } catch (error) {
+        console.log(error)
+        res.status(500).send({
+            success: false,
+            message: 'Error while getting order',
+            error
+        })
+    }
+}
+
+export const getAllOrderHandler = async(req, res) => {
+    try {
+        const orders = await orderModel.find({}).populate('products', '-photo').populate('buyer', 'name').sort({ createdAt: '-1' })
+        res.json(orders)
+    } catch (error) {
+        console.log(error)
+        res.status(500).send({
+            success: false,
+            message: 'Error while getting order',
+            error
+        })
+    }
+}
+
+// order status
+export const orderStatusHandler = async(req, res) => {
+    try {
+        const { orderId } = req.params
+        const { status } = req.body
+        const orders = await orderModel.findByIdAndUpdate(orderId, { status }, { new: true })
+        res.json(orders)
+    } catch (error) {
+        console.log(error)
+        res.status(500).send({
+            success: false,
+            message: 'Error while updating order status',
+            error
+        })
+    }
 }

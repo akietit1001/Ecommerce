@@ -1,5 +1,14 @@
 import express from 'express'
-import { registerHandler, loginHandler, testHandler, forgotPasswordHandler } from '../controllers/auth.js'
+import {
+    registerHandler,
+    loginHandler,
+    testHandler,
+    forgotPasswordHandler,
+    updateProfileHandler,
+    getOrderHandler,
+    getAllOrderHandler,
+    orderStatusHandler
+} from '../controllers/auth.js'
 import { requireSignIn, isAdmin } from '../middlewares/auth.js';
 
 // router obect
@@ -27,5 +36,17 @@ router.get('/user-auth', requireSignIn, (req, res) => {
 router.get('/admin-auth', requireSignIn, isAdmin, (req, res) => {
     res.status(200).send({ ok: true });
 })
+
+// update profile
+router.put('/profile', requireSignIn, updateProfileHandler)
+
+// orders
+router.get('/orders', requireSignIn, getOrderHandler)
+
+// All orders
+router.get('/all-orders', requireSignIn, isAdmin, getAllOrderHandler)
+
+// orders update
+router.put('/order-status/:orderId', requireSignIn, isAdmin, orderStatusHandler)
 
 export default router
