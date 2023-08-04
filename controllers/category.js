@@ -10,7 +10,7 @@ export const createCategoryHandler = async(req, res) => {
         }
         const existingCategory = await categoryModel.findOne({ name })
         if (existingCategory) {
-            return res.status(200).send({ message: 'Category already exists' })
+            return res.status(200).send({ message: 'Category already existed' })
         }
         const category = await new categoryModel({ name, slug: slugify(name) }).save()
         res.status(201).send({

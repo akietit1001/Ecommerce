@@ -19,7 +19,7 @@ export const isAdmin = async(req, res, next) => {
         if (user.role !== 1) {
             return res.status(401).send({
                 success: false,
-                message: 'UnAuthorized access'
+                message: 'Unauthorized access'
             })
         } else {
             next();
